@@ -1,25 +1,25 @@
 {
-  "name": "bilibili-video-download",
-  "version": "1.0.0",
-  "description": "BiliBili 视频下载工具",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/18zili/bilibili-video-download.git"
-  },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/18zili/bilibili-video-download/issues"
-  },
-  "homepage": "https://github.com/18zili/bilibili-video-download#readme",
-  "dependencies": {
-    "axios": "^0.21.0",
-    "inquirer": "^7.3.3",
-    "md5": "^2.3.0",
-    "request": "^2.88.2"
-  }
+	"name": "bilibili-video-download",
+	"version": "1.0.0",
+	"description": "BiliBili 视频下载工具",
+	"main": "index.js",
+	"scripts": {
+		"start": "node index.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/18zili/bilibili-video-download.git"
+	},
+	"author": "",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/18zili/bilibili-video-download/issues"
+	},
+	"homepage": "https://github.com/18zili/bilibili-video-download#readme",
+	"dependencies": {
+		"axios": "^0.21.0",
+		"inquirer": "^7.3.3",
+		"md5": "^2.3.0",
+		"request": "^2.88.2"
+	}
 }
