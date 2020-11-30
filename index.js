@@ -6,6 +6,8 @@ const request = require('request');
 const md5 = require('md5');
 const { isBV, bv2av } = require('./utils');
 
+const Progress = require('./progress');
+
 const promptList = [
 	{
 		type: 'input',
@@ -50,7 +52,6 @@ async function start() {
 
 	for (let i = 0; i < pages.length; i++) {
 		let { cid, part, page } = pages[i];
-		console.log(`正在下载：${part}`);
 		startUrl += '/?p=' + page;
 		const list = await getPlayList(startUrl, cid, 80);
 		await download(list, part, startUrl, page, format);
@@ -74,13 +75,12 @@ async function getPlayList(startUrl, cid, quality) {
 }
 
 async function download(list, title, startUrl, page, format) {
-	let num = 1;
 	const dir = path.join(__dirname, 'downloads');
 	if (!fs.existsSync(dir)) {
 		fs.mkdirSync(dir);
 	}
 	for (let i = 0; i < list.length; i++) {
-		const { length, size, url } = list[i];
+		const { size: total, url } = list[i];
 		const headers = {
 			// Host: 'upos-hz-mirrorks3.acgvideo.com', // 注意修改host,不用也行
 			'User-Agent':
@@ -93,15 +93,25 @@ async function download(list, title, startUrl, page, format) {
 			Origin: 'https://www.bilibili.com',
 			Connection: 'keep-alive',
 		};
+
 		return new Promise((resolve) => {
-			request({ url, headers })
-				.pipe(
-					fs.createWriteStream(path.join(dir, title + '.' + format))
-				)
-				.on('close', () => {
-					console.log(title + '下载完毕');
-					resolve();
+			const ProgressBar = new Progress('正在下载：' + title);
+			const downloadPath = path.join(dir, title + '.' + format);
+			const out = fs.createWriteStream(downloadPath);
+			const req = request({ url, headers });
+			req.pipe(out);
+			var completed = 0;
+			req.on('data', (data) => {
+				completed += data.length;
+				ProgressBar.render({
+					completed,
+					total,
 				});
+			});
+			req.on('clone', () => {
+				console.log(title + '下载完毕');
+				resolve();
+			});
 		});
 	}
 }
