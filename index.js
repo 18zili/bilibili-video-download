@@ -108,7 +108,7 @@ async function download(list, title, startUrl, page, format) {
 					total,
 				});
 			});
-			req.on('clone', () => {
+			req.on('close', () => {
 				console.log(title + '下载完毕');
 				resolve();
 			});
