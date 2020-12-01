@@ -24,7 +24,7 @@ const promptList = [
 		type: 'list',
 		name: 'format',
 		message: '请选择视频格式',
-		choices: ['MP4', 'flv'],
+		choices: ['mp4', 'flv'],
 	},
 ];
 
