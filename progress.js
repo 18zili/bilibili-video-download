@@ -1,4 +1,5 @@
 const slog = require('single-line-log').stdout;
+const { bytesToSize } = require('./utils');
 
 function ProgressBar(description, bar_length) {
 	this.description = description || 'Progress';
@@ -18,17 +19,11 @@ function ProgressBar(description, bar_length) {
 			empty += '░';
 		}
 
-		let cmdText =
-			this.description +
-			'  ' +
-			(100 * percent).toFixed(2) +
-			'% ' +
-			cell +
-			empty +
-			' ' +
-			opts.completed +
-			'/' +
-			opts.total;
+		let cmdText = `${this.description}  ${(100 * percent).toFixed(
+			2
+		)}% ${cell}${empty} ${bytesToSize(opts.completed)}/${bytesToSize(
+			opts.total
+		)}`;
 
 		slog(cmdText);
 	};

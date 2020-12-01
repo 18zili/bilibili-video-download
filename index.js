@@ -18,7 +18,8 @@ const promptList = [
 		type: 'list',
 		name: 'quality',
 		message: '请选择下载清晰度:',
-		choices: ['1080P', '720P', '480P', '360P'],
+		choices: ['1080P'],
+		// choices: ['1080P', '720P', '480P', '360P'],
 	},
 	{
 		type: 'list',
@@ -53,8 +54,11 @@ async function start() {
 	for (let i = 0; i < pages.length; i++) {
 		let { cid, part, page } = pages[i];
 		startUrl += '/?p=' + page;
-		const list = await getPlayList(startUrl, cid, 80);
-		await download(list, part, startUrl, page, format);
+		const list = await getPlayList(startUrl, cid, quality);
+		if (list.length > 2) {
+			console.warn('暂时只能下载第一条视频');
+		}
+		await download([list[0]], part, startUrl, page, format);
 	}
 }
 
@@ -70,37 +74,36 @@ async function getPlayList(startUrl, cid, quality) {
 			'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36',
 	};
 	const res = await axios.get(api, { headers });
-	const durl = res.data.durl;
-	return durl;
+	return res.data.durl;
 }
 
 async function download(list, title, startUrl, page, format) {
-	const dir = path.join(__dirname, 'downloads');
-	if (!fs.existsSync(dir)) {
-		fs.mkdirSync(dir);
-	}
-	for (let i = 0; i < list.length; i++) {
-		const { size: total, url } = list[i];
-		const headers = {
-			// Host: 'upos-hz-mirrorks3.acgvideo.com', // 注意修改host,不用也行
-			'User-Agent':
-				'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:56.0) Gecko/20100101 Firefox/56.0',
-			Accept: '*/*',
-			'Accept-Language': 'en-US,en;q=0.5',
-			'Accept-Encoding': 'gzip, deflate, br',
-			Range: 'bytes=0-', // Range 的值要为 bytes=0- 才能下载完整视频
-			Referer: startUrl, // 注意修改referer,必须要加的!
-			Origin: 'https://www.bilibili.com',
-			Connection: 'keep-alive',
-		};
+	return new Promise((resolve) => {
+		const dir = path.join(__dirname, 'downloads');
+		if (!fs.existsSync(dir)) {
+			fs.mkdirSync(dir);
+		}
+		for (let i = 0; i < list.length; i++) {
+			const { size: total, url } = list[i];
+			const headers = {
+				// Host: 'upos-hz-mirrorks3.acgvideo.com', // 注意修改host,不用也行
+				'User-Agent':
+					'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:56.0) Gecko/20100101 Firefox/56.0',
+				Accept: '*/*',
+				'Accept-Language': 'en-US,en;q=0.5',
+				'Accept-Encoding': 'gzip, deflate, br',
+				Range: 'bytes=0-',
+				Referer: startUrl,
+				Origin: 'https://www.bilibili.com',
+				Connection: 'keep-alive',
+			};
 
-		return new Promise((resolve) => {
+			let completed = 0;
 			const ProgressBar = new Progress('正在下载：' + title);
 			const downloadPath = path.join(dir, title + '.' + format);
 			const out = fs.createWriteStream(downloadPath);
 			const req = request({ url, headers });
 			req.pipe(out);
-			var completed = 0;
 			req.on('data', (data) => {
 				completed += data.length;
 				ProgressBar.render({
@@ -108,12 +111,12 @@ async function download(list, title, startUrl, page, format) {
 					total,
 				});
 			});
-			req.on('close', () => {
-				console.log(title + '下载完毕');
+			req.on('end', () => {
+				console.log('  下载完成！');
 				resolve();
 			});
-		});
-	}
+		}
+	});
 }
 
 start();
